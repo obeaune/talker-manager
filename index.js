@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
+const tokenGenerator = require('./tokenGenerator');
 
 const app = express();
 app.use(bodyParser.json());
@@ -14,7 +15,7 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-// Func
+// Função com fs.readFile
 const getTalkers = () => fs.readFile('./talker.json', 'utf8')
     .then((fileContent) => JSON.parse(fileContent));
 
@@ -37,6 +38,12 @@ app.get('/talker/:id', (req, res) => {
       return res.status(200).json(talkerById);
     })
     .catch((_err) => res.status(404).end());
+});
+
+// Requisito 3
+app.post('/login', tokenGenerator, (req, res) => {
+  const { newToken } = req;
+  res.status(200).json({ token: newToken });
 });
 
 app.listen(PORT, () => {
