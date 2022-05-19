@@ -2,7 +2,16 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const tokenGenerator = require('./tokenGenerator');
-const { validateEmail, validatePassword } = require('./validate');
+const {
+  validateEmail,
+  validatePassword,
+  validateToken,
+  validateName,
+  validateAge,
+  validateTalk,
+  validateWatchedAt,
+  validateRate,
+} = require('./validate');
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,6 +28,9 @@ app.get('/', (_request, response) => {
 // Função com fs.readFile
 const getTalkers = () => fs.readFile('./talker.json', 'utf8')
     .then((fileContent) => JSON.parse(fileContent));
+
+// Função com fs.writeFile
+const setTalkers = (newTalker) => fs.writeFile('./talker.json', JSON.stringify(newTalker));
 
 // Requisito 1
 app.get('/talker', (_req, res) => {
@@ -45,6 +57,20 @@ app.get('/talker/:id', (req, res) => {
 app.post('/login', validateEmail, validatePassword, tokenGenerator, (req, res) => {
   const { newToken } = req;
   res.status(200).json({ token: newToken });
+});
+
+// Requisito 5
+app.post('/talker', validateToken, validateName, validateAge, validateTalk, validateWatchedAt,
+validateRate, (req, res) => {
+  const { name, age, talk } = req.body;
+  getTalkers()
+    .then((talkers) => {
+      const id = talkers.length + 1;
+      talkers.push({ id, name, age, talk });
+      setTalkers(talkers)
+        .then((_r) => res.status(201).json({ id, name, age, talk }))
+        .catch((err) => res.status(404).json({ erro: err.message }));
+    });
 });
 
 app.listen(PORT, () => {
