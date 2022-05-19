@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const tokenGenerator = require('./tokenGenerator');
+const { validateEmail, validatePassword } = require('./validate');
 
 const app = express();
 app.use(bodyParser.json());
@@ -23,7 +24,7 @@ const getTalkers = () => fs.readFile('./talker.json', 'utf8')
 app.get('/talker', (_req, res) => {
   getTalkers()
     .then((talkers) => res.status(200).json(talkers))
-    .catch((_err) => res.status(500).end());
+    .catch((err) => res.status(500).json({ erro: err.message }));
 });
 
 // Requisito 2
@@ -37,11 +38,11 @@ app.get('/talker/:id', (req, res) => {
       }
       return res.status(200).json(talkerById);
     })
-    .catch((_err) => res.status(404).end());
+    .catch((err) => res.status(404).json({ erro: err.message }));
 });
 
-// Requisito 3
-app.post('/login', tokenGenerator, (req, res) => {
+// Requisito 3 e 4
+app.post('/login', validateEmail, validatePassword, tokenGenerator, (req, res) => {
   const { newToken } = req;
   res.status(200).json({ token: newToken });
 });
