@@ -2,16 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const tokenGenerator = require('./tokenGenerator');
-const {
-  validateEmail,
-  validatePassword,
-  validateToken,
-  validateName,
-  validateAge,
-  validateTalk,
-  validateWatchedAt,
-  validateRate,
-} = require('./validate');
+const { validateEmail, validatePassword, talkerValidation } = require('./validate');
 
 const app = express();
 app.use(bodyParser.json());
@@ -60,8 +51,7 @@ app.post('/login', validateEmail, validatePassword, tokenGenerator, (req, res) =
 });
 
 // Requisito 5
-app.post('/talker', validateToken, validateName, validateAge, validateTalk, validateWatchedAt,
-validateRate, (req, res) => {
+app.post('/talker', talkerValidation, (req, res) => {
   const { name, age, talk } = req.body;
   getTalkers()
     .then((talkers) => {
@@ -70,6 +60,22 @@ validateRate, (req, res) => {
       setTalkers(talkers)
         .then((_r) => res.status(201).json({ id, name, age, talk }))
         .catch((err) => res.status(404).json({ erro: err.message }));
+    });
+});
+
+// Requisito 6
+app.put('/talker/:id', talkerValidation, (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  getTalkers()
+    .then((t) => {
+      const talker = t;
+      const numberId = Number(id);
+      const index = talker.findIndex((obj) => obj.id === numberId);
+      talker[index] = ({ id: numberId, name, age, talk });
+      setTalkers(talker)
+        .then((_arr) => res.status(200).json({ id: numberId, name, age, talk }))
+        .catch((err) => res.status(400).json({ erro: err.message }));
     });
 });
 

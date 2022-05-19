@@ -1,8 +1,6 @@
 const validateEmail = (req, res, next) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'O campo "email" é obrigatório' });
-  // eslint-disable-next-line no-useless-escape
-  // const validRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   const validRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
   if (!(validRegex.test(email))) {
     return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
@@ -55,7 +53,7 @@ const validateAge = (req, res, next) => {
 
 const validateTalk = (req, res, next) => {
   const { talk } = req.body;
-  if (!talk || !talk.watchedAt || !talk.rate) {
+  if (!talk || !talk.watchedAt || talk.rate === undefined) {
     return res.status(400).json({
       message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios',
     });
@@ -84,13 +82,11 @@ const validateRate = (req, res, next) => {
   next();
 };
 
+const talkerValidation = [validateToken, validateName, validateAge, validateTalk,
+  validateWatchedAt, validateRate];
+
 module.exports = {
   validateEmail,
   validatePassword,
-  validateToken,
-  validateName,
-  validateAge,
-  validateTalk,
-  validateWatchedAt,
-  validateRate,
+  talkerValidation,
 };
