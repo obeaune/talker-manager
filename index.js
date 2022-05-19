@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const tokenGenerator = require('./tokenGenerator');
-const { validateEmail, validatePassword, talkerValidation } = require('./validate');
+const { validateEmail, validatePassword, validateToken, talkerValidation } = require('./validate');
 
 const app = express();
 app.use(bodyParser.json());
@@ -75,6 +75,18 @@ app.put('/talker/:id', talkerValidation, (req, res) => {
       talker[index] = ({ id: numberId, name, age, talk });
       setTalkers(talker)
         .then((_arr) => res.status(200).json({ id: numberId, name, age, talk }))
+        .catch((err) => res.status(400).json({ erro: err.message }));
+    });
+});
+
+// Requisito 7
+app.delete('/talker/:id', validateToken, (req, res) => {
+  const { id } = req.params;
+  getTalkers()
+    .then((arrT) => {
+      const filteredTalkers = arrT.filter((talker) => talker.id !== Number(id));
+      setTalkers(filteredTalkers)
+        .then((_arr) => res.status(204).end())
         .catch((err) => res.status(400).json({ erro: err.message }));
     });
 });

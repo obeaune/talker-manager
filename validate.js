@@ -88,5 +88,6 @@ const talkerValidation = [validateToken, validateName, validateAge, validateTalk
 module.exports = {
   validateEmail,
   validatePassword,
+  validateToken,
   talkerValidation,
 };
