@@ -26,8 +26,18 @@ const setTalkers = (newTalker) => fs.writeFile('./talker.json', JSON.stringify(n
 // Requisito 1
 app.get('/talker', (_req, res) => {
   getTalkers()
-    .then((talkers) => res.status(200).json(talkers))
-    .catch((err) => res.status(500).json({ erro: err.message }));
+  .then((talkers) => res.status(200).json(talkers))
+  .catch((err) => res.status(500).json({ erro: err.message }));
+});
+
+// Requisito 8
+app.get('/talker/search', validateToken, (req, res) => {
+  const { q } = req.query;
+  getTalkers()
+  .then((arrT) => {
+    const filteredTalkers = arrT.filter((obj) => obj.name.includes(q));
+    return res.status(200).json(filteredTalkers);
+  });
 });
 
 // Requisito 2
